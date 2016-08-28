@@ -12,31 +12,29 @@
   <template>
     <style>
       :host {
-        display: block;
-      
+        display: block; 
       }
       .container{
         @apply(--layout-center-justified);
         @apply(--layout-horizontal);
         @apply(--layout-center);
-        padding:10px;
         margin-top:15px;
-        border:1px solid black;
+      
       }
       paper-input{
-        width:300px;
-        margin-right:5px;
-       
+        width:400px;
+        margin-right:10px;
       }
       paper-button{
         background:white;
+        
       }
       app-toolbar{
         background:purple;
         color:white;
       }
-     .main-container{
-       
+     todo-list{
+       width:500px;
      }
     </style>
     
@@ -48,17 +46,16 @@
         </app-toolbar>
       </app-header>
 
-      <div class="main-container">
-        <div class="container">
-          <paper-input label="Whats needs to be done?" ></paper-input>
-          <paper-button raised>Add</paper-button> 
-        </div>
-        <div class="container">
-          <todo-list></todo-list>
-        </div> 
+      <div class="container">
+        <paper-input label="Whats needs to be done?" ></paper-input>
+        <paper-button raised>Add</paper-button> 
       </div>
+
+      <div class="container">
+        <todo-list></todo-list>
+      </div> 
       
-  </app-header-layout>
+   </app-header-layout>
     
     
     
