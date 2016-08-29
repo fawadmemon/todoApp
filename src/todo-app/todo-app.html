@@ -9,12 +9,14 @@
 <link rel="import" href="../../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="./todo-list.html">
-
+<link rel="import" href="./todo-login.html">
 <dom-module id="todo-app">
   <template>
     <style>
       :host {
-        display: block; 
+        display: block;
+        height:100vh;
+        border:1px solid black; 
       }
       .container{
         @apply(--layout-center-justified);
@@ -48,7 +50,7 @@
           <div main-title>Todo App</div>
         </app-toolbar>
       </app-header>
-
+      
       <div class="container">
         <paper-input id="input" label="Whats needs to be done?" value="{{editableItem.title}}"></paper-input>
         <paper-button raised on-tap="addItem">Add</paper-button> 
@@ -59,7 +61,7 @@
       </div> 
       
    </app-header-layout>
-
+   <todo-login></todo-login>
     <!--firebase stuff-->
       <firebase-query
             id="query"
