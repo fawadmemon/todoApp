@@ -1,12 +1,37 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-material/paper-material.html">
+<link rel="import" href="../../bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="./my-icons.html">
+
 <dom-module id="todo-item">
     <template>
-        <h1>Hello i am toodo item</h1>
+        <style>
+            :host {
+                display: block;
+            }
+            .container{
+                @apply(--layout-horizontal);
+                @apply(--layout-center);
+                padding:10px;
+            }
+            .flex-child{
+                @apply(--layout-flex);
+                margin-left:15px;
+            }
+        </style>
+       
+       <paper-material elevation="1" class="container">
+           <paper-checkbox checked></paper-checkbox>
+           <h3 class="flex-child">Hey i am done!</h3>
+           <paper-icon-button icon="my-icons:delete"></paper-icon-button>
+       </paper-material>
+       
     </template>
     <script>
         Polymer({
-            is:'todo-item',
-            
-        })
+            is: 'todo-item'
+        });
     </script>
 </dom-module>

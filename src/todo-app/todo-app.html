@@ -1,13 +1,65 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../../bower_components/app-layout/app-scroll-effects/effects/waterfall.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="./todo-list.html">
 
 <dom-module id="todo-app">
   <template>
     <style>
       :host {
-        display: block;
+        display: block; 
       }
+      .container{
+        @apply(--layout-center-justified);
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        margin-top:15px;
+      
+      }
+      paper-input{
+        width:400px;
+        margin-right:10px;
+      }
+      paper-button{
+        background:white;
+        
+      }
+      app-toolbar{
+        background:purple;
+        color:white;
+      }
+     todo-list{
+       width:500px;
+     }
     </style>
-    <h2>Hello [[prop1]]</h2>
+    
+    <app-header-layout>
+      
+      <app-header fixed condenses effects="waterfall">
+        <app-toolbar>
+          <div main-title>Todo App</div>
+        </app-toolbar>
+      </app-header>
+
+      <div class="container">
+        <paper-input label="Whats needs to be done?" ></paper-input>
+        <paper-button raised>Add</paper-button> 
+      </div>
+
+      <div class="container">
+        <todo-list></todo-list>
+      </div> 
+      
+   </app-header-layout>
+    
+    
+    
+    
   </template>
 
   <script>
