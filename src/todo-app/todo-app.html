@@ -6,6 +6,8 @@
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="./todo-list.html">
 
 <dom-module id="todo-app">
@@ -19,6 +21,7 @@
         @apply(--layout-horizontal);
         @apply(--layout-center);
         margin-top:15px;
+        padding:10px;
       
       }
       paper-input{
@@ -37,7 +40,7 @@
        width:500px;
      }
     </style>
-    
+
     <app-header-layout>
       
       <app-header fixed condenses effects="waterfall">
@@ -47,16 +50,31 @@
       </app-header>
 
       <div class="container">
-        <paper-input label="Whats needs to be done?" ></paper-input>
-        <paper-button raised>Add</paper-button> 
+        <paper-input id="input" label="Whats needs to be done?" value="{{editableItem.title}}"></paper-input>
+        <paper-button raised on-tap="addItem">Add</paper-button> 
       </div>
 
       <div class="container">
-        <todo-list></todo-list>
+        <todo-list todos="{{data}}" on-delete="delete"></todo-list>
       </div> 
       
    </app-header-layout>
-    
+
+    <!--firebase stuff-->
+      <firebase-query
+            id="query"
+            app-name="todoApp"
+            path="/items"
+            data="{{data}}">
+      </firebase-query>
+
+      <firebase-document
+            id="document"
+            app-name="todoApp"
+            path="{{editableItemPath}}"
+            data="{{editableItem}}">
+     </firebase-document>    
+   
     
     
     
@@ -66,13 +84,28 @@
     Polymer({
 
       is: 'todo-app',
-
       properties: {
-        prop1: {
-          type: String,
-          value: 'todo-app',
-        },
+        defaultItemPath:{
+          type:String,
+          value:'/items'
+        }
       },
+      addItem:function(event)
+      {
+        this.editableItem.done=false;
+        this.$.document.save(this.defaultItemPath).then(()=>{
+          
+          this.$.document.reset();
+          this.$.input.value='';
+          
+        });
+      },
+      delete(event){
+        const id=Polymer.dom(event).event.target.id
+        this.editableItemPath=this.defaultItemPath+'/'+id;
+        this.$.document.destroy();
+      }
+      
 
     });
   </script>

@@ -20,21 +20,40 @@
                 @apply(--layout-flex);
                 margin-left:15px;
             }
+            paper-material{
+                background:white;
+            }
             p{
                 font-size:20px;   
+            }
+            .checked{
+                text-decoration:line-through;
+                color:grey;
             }
         </style>
        
        <paper-material elevation="1" class="container">
-           <paper-checkbox checked></paper-checkbox>
-           <p class="flex-child">Hey i am done!</p>
-           <paper-icon-button icon="my-icons:delete"></paper-icon-button>
+           <paper-checkbox checked="{{done}}"></paper-checkbox>
+           <p class$="flex-child {{computeClass(done)}}">[[title]]</p>
+           <paper-icon-button icon="my-icons:delete" on-tap="delete"></paper-icon-button>
        </paper-material>
        
     </template>
     <script>
         Polymer({
-            is: 'todo-item'
+            is: 'todo-item',
+            properties:{
+                done:{
+                    type:Boolean,
+                    notify:true  // two way binding to make changes in firbase 
+                }    
+            },
+            computeClass(done){
+                return done? 'checked' : '';
+            },
+            delete(){
+                this.fire('delete');
+            }
         });
     </script>
 </dom-module>
