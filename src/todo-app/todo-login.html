@@ -15,7 +15,13 @@
                 bottom: 0;
                 z-index:1;
                 background:purple;
+                transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                   
+            }
+            :host([signed-in]){
+                opacity:0;
+                pointer-events: none;
+                
             }
             .container{
                 
@@ -39,9 +45,7 @@
             }
         </style>
 
-        <div class="container">
-            <!--<paper-icon-button icon="my-icons:account-circle" class="my-button"></paper-icon-button>
-            <span>SignIn with google</span>-->
+        <div class="container" >
             <paper-button on-tap="signIn" disabled="[[disabled]]">
                 <iron-icon icon="my-icons:account-circle"></iron-icon>
                 <span>Sign in with Google</span>
@@ -51,7 +55,27 @@
     </template>
     <script>
         Polymer({
-            is: 'todo-login'
+            is: 'todo-login',
+            properties:{
+                signedIn:{
+                    type:Boolean,
+                    reflectToAttribute:true,
+                    notify:true,
+                    value:false
+                }
+            },
+            // ready(){
+            //     if(this.signedIn){
+            //         console.log('ready')
+            //         this.style.display="none";
+            //     }
+            //     else{
+            //         console.log(this.signedIn)
+            //     }
+            // },
+            signIn(){
+                this.fire('sign-in');
+            }
         });
     </script>
 </dom-module>

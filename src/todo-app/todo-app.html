@@ -5,11 +5,15 @@
 <link rel="import" href="../../bower_components/app-layout/app-scroll-effects/effects/waterfall.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="./my-icons.html">
 <link rel="import" href="./todo-list.html">
 <link rel="import" href="./todo-login.html">
+
 <dom-module id="todo-app">
   <template>
     <style>
@@ -48,6 +52,7 @@
       <app-header fixed condenses effects="waterfall">
         <app-toolbar>
           <div main-title>Todo App</div>
+          <paper-icon-button icon="my-icons:[[computeLockIcon(signedIn)]]" on-tap="signOut"></paper-icon-button>
         </app-toolbar>
       </app-header>
       
@@ -61,8 +66,29 @@
       </div> 
       
    </app-header-layout>
-   <todo-login></todo-login>
+  
+  
+  
+    <todo-login
+            id="login"
+            on-sign-in="signIn"
+            signed-in="[[signedIn]]">
+    </todo-login>
+
+  
+   
+    
+    
     <!--firebase stuff-->
+
+      <firebase-auth
+            id="auth"
+            app-name="todoApp"
+            signed-in="{{signedIn}}"
+            user="{{user}}"
+            provider="google">
+      </firebase-auth>
+
       <firebase-query
             id="query"
             app-name="todoApp"
@@ -77,9 +103,6 @@
             data="{{editableItem}}">
      </firebase-document>    
    
-    
-    
-    
   </template>
 
   <script>
@@ -95,7 +118,7 @@
       addItem:function(event)
       {
         this.editableItem.done=false;
-        this.$.document.save(this.defaultItemPath).then(()=>{
+        return this.$.document.save(this.defaultItemPath).then(()=>{
           
           this.$.document.reset();
           this.$.input.value='';
@@ -106,6 +129,15 @@
         const id=Polymer.dom(event).event.target.id
         this.editableItemPath=this.defaultItemPath+'/'+id;
         this.$.document.destroy();
+      },
+      signIn(){
+        this.$.auth.signInWithPopup();
+      },
+      signOut(){
+        this.$.auth.signOut();
+      },
+      computeLockIcon(signedIn){
+        return signedIn? 'lock-open':'lock';
       }
       
 
