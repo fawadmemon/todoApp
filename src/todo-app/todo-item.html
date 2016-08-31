@@ -48,10 +48,10 @@
                     notify:true  // two way binding to make changes in firbase 
                 }    
             },
-            computeClass(done){
+            computeClass:function(done){
                 return done? 'checked' : '';
             },
-            delete(){
+            delete:function(){
                 this.fire('delete');
             }
         });

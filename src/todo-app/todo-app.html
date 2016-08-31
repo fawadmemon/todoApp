@@ -117,12 +117,6 @@
           value:'/items'
         }
       },
-      swInstalled(){
-          console.log('sw installed');
-      },
-      swError(){
-        console.log('sw-error');
-      },
       addItem:function(event)
       {
         this.editableItem.done=false;
@@ -133,18 +127,18 @@
           
         });
       },
-      delete(event){
+      delete:function(event){
         const id=Polymer.dom(event).event.target.id
         this.editableItemPath=this.defaultItemPath+'/'+id;
         this.$.document.destroy();
       },
-      signIn(){
+      signIn:function(){
         this.$.auth.signInWithPopup();
       },
-      signOut(){
+      signOut:function(){
         this.$.auth.signOut();
       },
-      computeLockIcon(signedIn){
+      computeLockIcon:function(signedIn){
         return signedIn? 'lock-open':'lock';
       }
       
