@@ -1,0 +1,44 @@
+<html><head><link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-material/paper-material.html">
+<link rel="import" href="../../bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="./my-icons.html">
+
+</head><body><dom-module id="todo-item">
+    <template>
+        <style>
+            :host {
+                display: block;
+            }
+            .container{
+                @apply(--layout-horizontal);
+                @apply(--layout-center);
+                padding:10px;
+            }
+            .flex-child{
+                @apply(--layout-flex);
+                margin-left:15px;
+            }
+            paper-material{
+                background:white;
+            }
+            p{
+                font-size:20px;   
+            }
+            .checked{
+                text-decoration:line-through;
+                color:grey;
+            }
+        </style>
+       
+       <paper-material elevation="1" class="container">
+           <paper-checkbox checked="{{done}}"></paper-checkbox>
+           <p class$="flex-child {{computeClass(done)}}">[[title]]</p>
+           <paper-icon-button icon="my-icons:delete" on-tap="delete"></paper-icon-button>
+       </paper-material>
+       
+    </template>
+    <script>Polymer({is:"todo-item",properties:{done:{type:Boolean,notify:!0}},computeClass:function(e){return e?"checked":""},delete:function(){this.fire("delete")}});</script>
+</dom-module>
+</body></html>
