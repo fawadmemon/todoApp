@@ -10,6 +10,8 @@
 <link rel="import" href="../../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../../bower_components/platinum-sw/platinum-sw-register.html">
+<link rel="import" href="../../bower_components/platinum-sw/platinum-sw-cache.html">
 <link rel="import" href="./my-icons.html">
 <link rel="import" href="./todo-list.html">
 <link rel="import" href="./todo-login.html">
@@ -76,9 +78,6 @@
     </todo-login>
 
   
-   
-    
-    
     <!--firebase stuff-->
 
       <firebase-auth
@@ -101,7 +100,10 @@
             app-name="todoApp"
             path="{{editableItemPath}}"
             data="{{editableItem}}">
-     </firebase-document>    
+     </firebase-document> 
+
+     <!--service Worker Stuff-->
+     
    
   </template>
 
@@ -114,6 +116,12 @@
           type:String,
           value:'/items'
         }
+      },
+      swInstalled(){
+          console.log('sw installed');
+      },
+      swError(){
+        console.log('sw-error');
       },
       addItem:function(event)
       {
