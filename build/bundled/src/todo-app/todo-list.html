@@ -1,0 +1,33 @@
+<html><head><link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="./todo-item.html">
+</head><body><dom-module id="todo-list">
+    <template>
+        <style>
+            :host {
+                display: block;
+               
+            }
+            .container{
+                @apply(--layout-vertical);
+                @apply(--layout-center-justified);
+            }
+            todo-item:nth-child(1n+1){
+                margin-top:20px;    
+            }
+        </style>
+
+      
+
+        <div class="container">
+            <h2>Your Todo List</h2>
+            <template is="dom-repeat" items="{{todos}}">
+                <todo-item id$="[[item.$key]]" title="[[item.title]]" done="{{item.done}}"></todo-item>
+            </template>
+        </div>
+
+    </template>
+
+    <script>Polymer({is:"todo-list"});</script>
+</dom-module>
+</body></html>

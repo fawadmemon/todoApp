@@ -1,4 +1,4 @@
-<link rel="import" href="../../bower_components/polymer/polymer.html">
+<html><head><link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/app-layout/app-header-layout/app-header-layout.html">
 <link rel="import" href="../../bower_components/app-layout/app-header/app-header.html">
 <link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
@@ -15,7 +15,7 @@
 <link rel="import" href="./todo-list.html">
 <link rel="import" href="./todo-login.html">
 
-<dom-module id="todo-app">
+</head><body><dom-module id="todo-app">
   <template>
     <style>
       :host {
@@ -50,16 +50,16 @@
 
     <app-header-layout>
       
-      <app-header fixed condenses effects="waterfall">
+      <app-header fixed="" condenses="" effects="waterfall">
         <app-toolbar>
-          <div main-title>Todo App</div>
+          <div main-title="">Todo App</div>
           <paper-icon-button icon="my-icons:[[computeLockIcon(signedIn)]]" on-tap="signOut"></paper-icon-button>
         </app-toolbar>
       </app-header>
       
       <div class="container">
         <paper-input id="input" label="Whats needs to be done?" value="{{editableItem.title}}"></paper-input>
-        <paper-button raised on-tap="addItem">Add</paper-button> 
+        <paper-button raised="" on-tap="addItem">Add</paper-button> 
       </div>
 
       <div class="container">
@@ -70,88 +70,29 @@
   
   
   
-    <todo-login
-            id="login"
-            on-sign-in="signIn"
-            signed-in="[[signedIn]]">
+    <todo-login id="login" on-sign-in="signIn" signed-in="[[signedIn]]">
     </todo-login>
 
   
-    <!--firebase stuff-->
+    
 
-      <firebase-app
-            name="todoApp"
-            api-key= "AIzaSyCMYQPXw0l3g0yXvumcOPX35NjFeh0IIJw"
-            auth-domain= "todoapp-9b4cb.firebaseapp.com"
-            database-url= "https://todoapp-9b4cb.firebaseio.com">
+      <firebase-app name="todoApp" api-key="AIzaSyCMYQPXw0l3g0yXvumcOPX35NjFeh0IIJw" auth-domain="todoapp-9b4cb.firebaseapp.com" database-url="https://todoapp-9b4cb.firebaseio.com">
       </firebase-app>
 
-      <firebase-auth
-            id="auth"
-            app-name="todoApp"
-            signed-in="{{signedIn}}"
-            user="{{user}}"
-            provider="google">
+      <firebase-auth id="auth" app-name="todoApp" signed-in="{{signedIn}}" user="{{user}}" provider="google">
       </firebase-auth>
 
-      <firebase-query
-            id="query"
-            app-name="todoApp"
-            path="/items"
-            data="{{data}}">
+      <firebase-query id="query" app-name="todoApp" path="/items" data="{{data}}">
       </firebase-query>
 
-      <firebase-document
-            id="document"
-            app-name="todoApp"
-            path="{{editableItemPath}}"
-            data="{{editableItem}}">
+      <firebase-document id="document" app-name="todoApp" path="{{editableItemPath}}" data="{{editableItem}}">
      </firebase-document> 
 
-     <!--service Worker Stuff-->
+     
      
    
   </template>
 
-  <script>
-    Polymer({
-
-      is: 'todo-app',
-      properties: {
-        defaultItemPath:{
-          type:String,
-          value:'/items'
-        },
-        editableItemPath:String,
-        user:Object
-
-      },
-      addItem:function(event)
-      {
-        this.editableItem.done=false;
-        var app=this
-        return this.$.document.save(this.defaultItemPath).then(function(){ 
-          app.$.document.reset();
-          app.$.input.value='';   
-        });
-      },
-      delete:function(event){
- 
-        var id=Polymer.dom(event).rootTarget.id;
-        this.editableItemPath=this.defaultItemPath+'/'+id;
-        this.$.document.destroy();
-      },
-      signIn:function(){
-        this.$.auth.signInWithPopup();
-      },
-      signOut:function(){
-        this.$.auth.signOut();
-      },
-      computeLockIcon:function(signedIn){
-        return signedIn? 'lock-open':'lock';
-      }
-      
-
-    });
-  </script>
+  <script>Polymer({is:"todo-app",properties:{defaultItemPath:{type:String,value:"/items"},editableItemPath:String,user:Object},addItem:function(t){this.editableItem.done=!1;var e=this;return this.$.document.save(this.defaultItemPath).then(function(){e.$.document.reset(),e.$.input.value=""})},delete:function(t){var e=Polymer.dom(t).rootTarget.id;this.editableItemPath=this.defaultItemPath+"/"+e,this.$.document.destroy()},signIn:function(){this.$.auth.signInWithPopup()},signOut:function(){this.$.auth.signOut()},computeLockIcon:function(t){return t?"lock-open":"lock"}});</script>
 </dom-module>
+</body></html>
