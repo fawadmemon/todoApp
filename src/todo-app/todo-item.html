@@ -3,6 +3,10 @@
 <link rel="import" href="../../bower_components/paper-checkbox/paper-checkbox.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../../bower_components/neon-animation/neon-animation-runner-behavior.html">
+<link rel="import" href="../../bower_components/neon-animation/animations/slide-from-top-animation.html">
+<link rel="import" href="../../bower_components/neon-animation/animations/fade-in-animation.html">
+<link rel="import" href="../../bower_components/neon-animation/animations/fade-out-animation.html">
 <link rel="import" href="./my-icons.html">
 
 <dom-module id="todo-item">
@@ -20,18 +24,84 @@
                 @apply(--layout-flex);
                 margin-left:15px;
             }
+            paper-material{
+                background:white;
+            }
+            p{
+                font-size:20px;   
+            }
+            .checked{
+                text-decoration:line-through;
+                color:grey;
+            }
         </style>
        
        <paper-material elevation="1" class="container">
-           <paper-checkbox checked></paper-checkbox>
-           <h3 class="flex-child">Hey i am done!</h3>
-           <paper-icon-button icon="my-icons:delete"></paper-icon-button>
+           <paper-checkbox checked="{{done}}"></paper-checkbox>
+           <p class$="flex-child {{computeClass(done)}}">[[title]]</p>
+           <paper-icon-button icon="my-icons:delete" on-tap="delete"></paper-icon-button>
        </paper-material>
        
     </template>
     <script>
         Polymer({
-            is: 'todo-item'
+            is: 'todo-item',
+            behaviors:[Polymer.NeonAnimationRunnerBehavior],
+            listeners:{
+                'neon-animation-finish':'_onAnimationFinish'
+            },
+            properties:{
+                done:{
+                    type:Boolean,
+                    notify:true  // two way binding to make changes in firbase 
+                },
+                delete:{        
+                    type:Boolean, // temp flag for neon animation
+                    value:false
+                },
+                animationConfig:{
+                    value:function(){
+                        return {
+                            'entry':[
+                                {
+                                    name:'slide-from-top-animation',
+                                    node:this,
+                                    timing:{duration:300}
+                                },
+                                {
+                                    name:'fade-in-animation',
+                                    node:this,
+                                    timing:{delay:100,duration:200}
+                                }
+                            ],
+                            'exit':{
+                                name:'fade-out-animation',
+                                node:this,
+                                timing:{duration:300}
+                            }
+                        }
+                    }
+                }    
+            },
+            ready:function(){
+                
+                this.playAnimation('entry')
+            },
+            computeClass:function(done){
+                return done? 'checked' : '';
+            },
+            delete:function(){
+                this.playAnimation('exit');
+                this.delete=true
+                
+                
+            },
+            _onAnimationFinish:function(){
+                if(this.delete==true){
+                  this.style.display='none';  
+                  this.fire('delete');
+                }
+            }
         });
     </script>
 </dom-module>

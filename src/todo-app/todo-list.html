@@ -1,5 +1,6 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
 <link rel="import" href="./todo-item.html">
 <dom-module id="todo-list">
     <template>
@@ -12,20 +13,68 @@
                 @apply(--layout-vertical);
                 @apply(--layout-center-justified);
             }
+            #overlay paper-spinner{
+                display:block;
+                margin:auto;
+            }
+            #recordFound{
+                color:grey;
+                font-style: italic;
+
+            }
             todo-item:nth-child(1n+1){
-                margin-top:20px;    
+                margin-top:10px;    
             }
         </style>
-        <div class="container">
-            <h2>Your Todo List</h2>
-            <todo-item></todo-item>
-            <todo-item></todo-item>
-            <todo-item></todo-item>
+
+      <h2>Your Todo List</h2>
+        <div hidden$="[[!isLoading]]" id="overlay">
+            <paper-spinner active > </paper-spinner> 
         </div>
+        <p id="recordFound" hidden$="[[recordFound]]">No Record Found</p>
+        <div class="container" >
+            <template is="dom-repeat" items="{{todos}}">
+                <todo-item
+                id$="[[item.$key]]"
+                title="[[item.title]]"   
+                done="{{item.done}}"></todo-item>
+            </template>
+        </div>
+
     </template>
+
     <script>
         Polymer({
-            is: 'todo-list'
+            is: 'todo-list',
+            properties:{
+                isLoading:{
+                    type:Boolean,
+                    value:true
+                },
+                recordFound:{
+                    type:Boolean,
+                    value:true
+                }
+            },
+            observers:['_todosChanged(todos.length)'],
+            _todosChanged:function(length){
+               if(length>0){
+                   this.isLoading=false;
+                   this.recordFound=true;
+               }
+               else{
+                   if(this.isLoading==false){
+                       this.recordFound=false;
+                   }
+                   this.async(function(){
+                       this.isLoading=false;
+                       if(this.todos.length<=0){
+                           this.recordFound=false;
+                       }
+                      
+                   },6000);
+               }
+            }
         });
     </script>
 </dom-module>

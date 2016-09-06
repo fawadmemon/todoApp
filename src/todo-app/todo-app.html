@@ -5,20 +5,35 @@
 <link rel="import" href="../../bower_components/app-layout/app-scroll-effects/effects/waterfall.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-app.html">
+<link rel="import" href="../../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror-worker.js">
+<link rel="import" href="../../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
+<link rel="import" href="../../bower_components/iron-a11y-keys/iron-a11y-keys.html">
+<link rel="import" href="../../bower_components/app-storage/app-network-status-behavior.html">
+<link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="./my-icons.html">
 <link rel="import" href="./todo-list.html">
+<link rel="import" href="./todo-login.html">
 
 <dom-module id="todo-app">
   <template>
     <style>
       :host {
-        display: block; 
+        display: block;
+        height:100vh;
       }
       .container{
         @apply(--layout-center-justified);
         @apply(--layout-horizontal);
         @apply(--layout-center);
         margin-top:15px;
+        padding:10px;
       
       }
       paper-input{
@@ -37,42 +52,185 @@
        width:500px;
      }
     </style>
-    
+
     <app-header-layout>
       
       <app-header fixed condenses effects="waterfall">
         <app-toolbar>
           <div main-title>Todo App</div>
+          <paper-icon-button icon="my-icons:[[computeCloudIcon(online)]]"></paper-icon-button>
+          <paper-icon-button icon="my-icons:[[computeLockIcon(signedIn)]]" on-tap="signOut"></paper-icon-button>
         </app-toolbar>
       </app-header>
-
+      
       <div class="container">
-        <paper-input label="Whats needs to be done?" ></paper-input>
-        <paper-button raised>Add</paper-button> 
+        <paper-input id="input" label="Whats needs to be done?" value="{{editableItem.title}}"></paper-input>
+        <paper-button raised on-tap="addItem" disabled="[[!online]]">Add</paper-button> 
       </div>
 
       <div class="container">
-        <todo-list></todo-list>
+          <todo-list todos="{{updates}}" on-delete="delete"></todo-list>
       </div> 
       
    </app-header-layout>
+  
+    <todo-login
+            id="login"
+            on-sign-in="signIn"
+            disabled="[[!online]]"
+            signed-in="[[signedIn]]">
+    </todo-login>
     
+    <paper-toast id="toast" text="App is ready to be used offline"></paper-toast>
     
+    <!--IndexDb stuff-->
+    <app-indexeddb-mirror
+            id="indexdb"
+            key="/items"
+            data="{{data}}"
+            persisted-data="{{updates}}">
+    </app-indexeddb-mirror>
+
+  
+    <!--firebase stuff-->
+
+      <firebase-app
+            name="todoApp"
+            api-key= "AIzaSyCNesZuH875qAlmYwxThLVm52pGleWXjf4"
+            auth-domain= "todoapp-95f96.firebaseapp.com"
+            database-url= "https://todoapp-95f96.firebaseio.com">
+      </firebase-app>
+
+      <firebase-auth
+            id="auth"
+            app-name="todoApp"
+            signed-in="{{signedIn}}"
+            user="{{user}}"
+            provider="google">
+      </firebase-auth>
+
+      <firebase-query
+            id="query"
+            app-name="todoApp"
+            path="{{defaultItemPath}}"
+            data="{{data}}">
+      </firebase-query>
+
+      <firebase-document
+            id="document"
+            app-name="todoApp"
+            path="{{editableItemPath}}"
+            data="{{editableItem}}">
+     </firebase-document> 
     
-    
+     <!--iron keys-->
+     
+     <iron-a11y-keys target="[[target]]" keys="enter" on-keys-pressed="onEnter"></iron-a11y-keys>
+     
+     
+     
+   
   </template>
 
   <script>
     Polymer({
 
       is: 'todo-app',
-
+      behaviors: [
+        Polymer.AppNetworkStatusBehavior
+      ],
+      observers:['_onUserChanged(user.*)'],
       properties: {
-        prop1: {
-          type: String,
-          value: 'todo-app',
+        target:{
+          type:Object,
+          value:function(){
+            return this.$.input;
+          }
         },
+        staticUserID:{
+          type:Object,
+          notify:true,
+          value:function(){
+            return localStorage.getItem('userID') ;
+          }
+        },
+        user:{
+          type:Object
+        },
+        defaultItemPath:{
+          type:String,
+          computed:'computeDefaultPath(user)'
+        },
+        editableItemPath:String,
+        user:Object,
+        signedIn:{
+          type:Boolean,
+          value:false,
+          observer:'_signedInChanged'
+        },
+        data:{
+          type:Object,
+        }
       },
+      _onUserChanged:function(changeRecord){
+          if(changeRecord.value){
+            localStorage.setItem('userID',changeRecord.value.uid);
+          }
+          
+      },
+      computeDefaultPath:function(user){
+        if(user)return '/items/'+user.uid;
+        return '';
+      },
+      onEnter:function(){
+        if(this.online){
+          this.addItem();
+        }
+        
+      },
+      _signedInChanged:function(){
+        var firstTimeLogin=localStorage.getItem('firstTimeLogin')|| "false";
+        if(self.navigator.serviceWorker.controller && this.signedIn && firstTimeLogin=="true"){
+            this.async(function(){this.$.toast.open()},3000);
+            localStorage.setItem('firstTimeLogin',"false");
+        }
+          
+      },
+      addItem:function(event)
+      {
+        this.editableItem.done=false;
+        var app=this
+        return this.$.document.save(this.defaultItemPath).then(function(){ 
+          app.$.document.reset();
+          app.$.input.value='';   
+        });
+      },
+      delete:function(event){
+ 
+        var id=Polymer.dom(event).rootTarget.id;
+        this.editableItemPath=this.defaultItemPath+'/'+id;
+        this.$.document.destroy();
+      },
+      signIn:function(){
+        this.$.auth.signInWithPopup().then(function(){
+          localStorage.setItem('firstTimeLogin',"true");
+        }).catch(function(eror){
+          console.log(eror);
+        });
+      },
+      signOut:function(){
+        this.$.auth.signOut();
+        localStorage.removeItem('firstTimeLogin');
+        localStorage.removeItem('userID');
+        this.staticUserID=null;
+      },
+      computeLockIcon:function(signedIn){
+        return signedIn? 'lock-open':'lock';
+      },
+      computeCloudIcon:function(online){
+        return online? 'cloud' : 'cloud-off';
+      }
+      
 
     });
   </script>

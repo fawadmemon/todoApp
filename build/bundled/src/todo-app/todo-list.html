@@ -1,0 +1,45 @@
+<html><head><link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="./todo-item.html">
+</head><body><dom-module id="todo-list">
+    <template>
+        <style>
+            :host {
+                display: block;
+               
+            }
+            .container{
+                @apply(--layout-vertical);
+                @apply(--layout-center-justified);
+            }
+            #overlay paper-spinner{
+                display:block;
+                margin:auto;
+            }
+            #recordFound{
+                color:grey;
+                font-style: italic;
+
+            }
+            todo-item:nth-child(1n+1){
+                margin-top:10px;    
+            }
+        </style>
+
+      <h2>Your Todo List</h2>
+        <div hidden$="[[!isLoading]]" id="overlay">
+            <paper-spinner active=""> </paper-spinner> 
+        </div>
+        <p id="recordFound" hidden$="[[recordFound]]">No Record Found</p>
+        <div class="container">
+            <template is="dom-repeat" items="{{todos}}">
+                <todo-item id$="[[item.$key]]" title="[[item.title]]" done="{{item.done}}"></todo-item>
+            </template>
+        </div>
+
+    </template>
+
+    <script>Polymer({is:"todo-list",properties:{isLoading:{type:Boolean,value:!0},recordFound:{type:Boolean,value:!0}},observers:["_todosChanged(todos.length)"],_todosChanged:function(o){o>0?(this.isLoading=!1,this.recordFound=!0):(0==this.isLoading&&(this.recordFound=!1),this.async(function(){this.isLoading=!1,this.todos.length<=0&&(this.recordFound=!1)},6e3))}});</script>
+</dom-module>
+</body></html>
