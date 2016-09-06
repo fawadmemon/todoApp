@@ -6,7 +6,7 @@ module.exports = {
     '/bower_components/webcomponentsjs/webcomponents-lite.min.js'
   ],
   //handleFetch :false,
-  navigateFallback: '/index.html',
+  // navigateFallback: '/index.html',
   // navigateFallbackWhitelist: [ /^\/[^\_]+\/?/ ],
   runtimeCaching:[{
     urlPattern:/^https:\/\/fonts.(?:googleapis|gstatic).com\/.*/,
