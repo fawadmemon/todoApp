@@ -11,6 +11,12 @@
 <link rel="import" href="../../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-app.html">
+<link rel="import" href="../../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror-worker.js">
+<link rel="import" href="../../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
+<link rel="import" href="../../bower_components/iron-a11y-keys/iron-a11y-keys.html">
+<link rel="import" href="../../bower_components/app-storage/app-network-status-behavior.html">
+<link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
 <link rel="import" href="./my-icons.html">
 <link rel="import" href="./todo-list.html">
 <link rel="import" href="./todo-login.html">
@@ -21,7 +27,6 @@
       :host {
         display: block;
         height:100vh;
-        border:1px solid black; 
       }
       .container{
         @apply(--layout-center-justified);
@@ -53,37 +58,47 @@
       <app-header fixed condenses effects="waterfall">
         <app-toolbar>
           <div main-title>Todo App</div>
+          <paper-icon-button icon="my-icons:[[computeCloudIcon(online)]]"></paper-icon-button>
           <paper-icon-button icon="my-icons:[[computeLockIcon(signedIn)]]" on-tap="signOut"></paper-icon-button>
         </app-toolbar>
       </app-header>
       
       <div class="container">
         <paper-input id="input" label="Whats needs to be done?" value="{{editableItem.title}}"></paper-input>
-        <paper-button raised on-tap="addItem">Add</paper-button> 
+        <paper-button raised on-tap="addItem" disabled="[[!online]]">Add</paper-button> 
       </div>
 
       <div class="container">
-        <todo-list todos="{{data}}" on-delete="delete"></todo-list>
+          <todo-list todos="{{updates}}" on-delete="delete"></todo-list>
       </div> 
       
    </app-header-layout>
   
-  
-  
     <todo-login
             id="login"
             on-sign-in="signIn"
+            disabled="[[!online]]"
             signed-in="[[signedIn]]">
     </todo-login>
+    
+    <paper-toast id="toast" text="App is ready to be used offline"></paper-toast>
+    
+    <!--IndexDb stuff-->
+    <app-indexeddb-mirror
+            id="indexdb"
+            key="/items"
+            data="{{data}}"
+            persisted-data="{{updates}}">
+    </app-indexeddb-mirror>
 
   
     <!--firebase stuff-->
 
       <firebase-app
             name="todoApp"
-            api-key= "AIzaSyCMYQPXw0l3g0yXvumcOPX35NjFeh0IIJw"
-            auth-domain= "todoapp-9b4cb.firebaseapp.com"
-            database-url= "https://todoapp-9b4cb.firebaseio.com">
+            api-key= "AIzaSyCNesZuH875qAlmYwxThLVm52pGleWXjf4"
+            auth-domain= "todoapp-95f96.firebaseapp.com"
+            database-url= "https://todoapp-95f96.firebaseio.com">
       </firebase-app>
 
       <firebase-auth
@@ -97,7 +112,7 @@
       <firebase-query
             id="query"
             app-name="todoApp"
-            path="/items"
+            path="{{defaultItemPath}}"
             data="{{data}}">
       </firebase-query>
 
@@ -107,8 +122,12 @@
             path="{{editableItemPath}}"
             data="{{editableItem}}">
      </firebase-document> 
-
-     <!--service Worker Stuff-->
+    
+     <!--iron keys-->
+     
+     <iron-a11y-keys target="[[target]]" keys="enter" on-keys-pressed="onEnter"></iron-a11y-keys>
+     
+     
      
    
   </template>
@@ -117,14 +136,65 @@
     Polymer({
 
       is: 'todo-app',
+      behaviors: [
+        Polymer.AppNetworkStatusBehavior
+      ],
+      observers:['_onUserChanged(user.*)'],
       properties: {
+        target:{
+          type:Object,
+          value:function(){
+            return this.$.input;
+          }
+        },
+        staticUserID:{
+          type:Object,
+          notify:true,
+          value:function(){
+            return localStorage.getItem('userID') ;
+          }
+        },
+        user:{
+          type:Object
+        },
         defaultItemPath:{
           type:String,
-          value:'/items'
+          computed:'computeDefaultPath(user)'
         },
         editableItemPath:String,
-        user:Object
-
+        user:Object,
+        signedIn:{
+          type:Boolean,
+          value:false,
+          observer:'_signedInChanged'
+        },
+        data:{
+          type:Object,
+        }
+      },
+      _onUserChanged:function(changeRecord){
+          if(changeRecord.value){
+            localStorage.setItem('userID',changeRecord.value.uid);
+          }
+          
+      },
+      computeDefaultPath:function(user){
+        if(user)return '/items/'+user.uid;
+        return '';
+      },
+      onEnter:function(){
+        if(this.online){
+          this.addItem();
+        }
+        
+      },
+      _signedInChanged:function(){
+        var firstTimeLogin=localStorage.getItem('firstTimeLogin')|| "false";
+        if(self.navigator.serviceWorker.controller && this.signedIn && firstTimeLogin=="true"){
+            this.async(function(){this.$.toast.open()},3000);
+            localStorage.setItem('firstTimeLogin',"false");
+        }
+          
       },
       addItem:function(event)
       {
@@ -142,13 +212,23 @@
         this.$.document.destroy();
       },
       signIn:function(){
-        this.$.auth.signInWithPopup();
+        this.$.auth.signInWithPopup().then(function(){
+          localStorage.setItem('firstTimeLogin',"true");
+        }).catch(function(eror){
+          console.log(eror);
+        });
       },
       signOut:function(){
         this.$.auth.signOut();
+        localStorage.removeItem('firstTimeLogin');
+        localStorage.removeItem('userID');
+        this.staticUserID=null;
       },
       computeLockIcon:function(signedIn){
         return signedIn? 'lock-open':'lock';
+      },
+      computeCloudIcon:function(online){
+        return online? 'cloud' : 'cloud-off';
       }
       
 
